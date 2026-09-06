@@ -1,0 +1,79 @@
+#include <SoftwareSerial.h>
+
+SoftwareSerial bluetooth(2, 3); // RX = Pin 2, TX = Pin 3
+
+const int ENA = 5;  
+const int IN1 = 6;  
+const int IN2 = 7;  
+
+const int IN3 = 8;  
+const int IN4 = 9;  
+const int ENB = 10; 
+
+const int MOTOR_SPEED = 200; 
+String command = "";
+
+void setup() {
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  analogWrite(ENA, MOTOR_SPEED);
+  analogWrite(ENB, MOTOR_SPEED);
+
+  Serial.begin(9600);
+  bluetooth.begin(9600);
+  
+  stopVehicle();
+}
+
+void loop() {
+  while (bluetooth.available() > 0) {
+    delay(10); 
+    char c = bluetooth.read();
+    if (c == '#') break; 
+    command += c;
+  }
+
+  if (command.length() > 0) {
+    command.toLowerCase();
+    command.trim();
+
+    if (command == "forward" || command == "go") moveForward();
+    else if (command == "backward" || command == "back") moveBackward();
+    else if (command == "left") turnLeft();
+    else if (command == "right") turnRight();
+    else if (command == "stop") stopVehicle();
+    else stopVehicle();
+
+    command = ""; 
+  }
+}
+
+void moveForward() {
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+
+void moveBackward() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, HIGH);
+}
+
+void turnLeft() {
+  digitalWrite(IN1, LOW);  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH); digitalWrite(IN4, LOW);
+}
+
+void turnRight() {
+  digitalWrite(IN1, HIGH); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);  digitalWrite(IN4, HIGH);
+}
+
+void stopVehicle() {
+  digitalWrite(IN1, LOW); digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); digitalWrite(IN4, LOW);
+}
